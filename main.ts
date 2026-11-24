@@ -1,11 +1,24 @@
-// A working news-image-daily entry (Node 22, standard library only): its image is the entry.png beside this file, and
-// the program copies it to /output/entry.png. A starting point, not a winner: replace the image. The gate takes a
-// whole PNG or JPEG of at most 1 MiB and 1024 by 1024 pixels, and the judge sees exactly the bytes copied.
+// news-image-20261124 entrypoint (Node 22, standard library only).
 //
-// Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
+// The entry image lives in this repo as entry.png — a front page drawn by
+// draw.py from six news stories verified as first reported on Tuesday
+// 24 November 2026 (see SOURCES.md). All this program does is place that
+// image where the grader reads it.
+//
+// The grader runs with no network, so the image is shipped in the repo
+// and copied, not fetched. Outside the grader, MAKEFUN_OUTPUT_DIR stands
+// in for /output:
 //   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 
-import { copyFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-copyFileSync(new URL('./entry.png', import.meta.url), join(process.env.MAKEFUN_OUTPUT_DIR ?? '/output', 'entry.png'));
+const repoDir = dirname(fileURLToPath(import.meta.url));
+const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+const target = join(outDir, 'entry.png');
+
+mkdirSync(outDir, { recursive: true });
+const bytes = readFileSync(join(repoDir, 'entry.png'));
+writeFileSync(target, bytes);
+console.log(`wrote ${target} (${bytes.length} bytes)`);
